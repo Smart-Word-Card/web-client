@@ -2,6 +2,7 @@ import "antd/dist/antd.css"
 import React from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { SWRConfig } from "swr"
+import AppLayout from "./components/AppLayout"
 import LandingPage from "./pages/Landing"
 import StudentCollectionsPage from "./pages/Student/Collections"
 import CollectionsPlayPage from "./pages/Student/Collections/Play"
@@ -13,30 +14,32 @@ import axiosFetcher from "./utils/axios/axiosFetcher"
 function App() {
 	return (
 		<SWRConfig value={{ fetcher: axiosFetcher, revalidateOnMount: true }}>
-			<BrowserRouter>
-				<Routes>
-					<Route index element={<LandingPage />} />
-					<Route path="teacher">
-						<Route path="collections">
-							<Route index element={<TeacherCollectionsPage />} />
-							<Route path="new" element={<CollectionsNewPage />} />
-							<Route
-								path="edit/:collectionId"
-								element={<CollectionsEditPage />}
-							/>
+			<AppLayout>
+				<BrowserRouter>
+					<Routes>
+						<Route index element={<LandingPage />} />
+						<Route path="teacher">
+							<Route path="collections">
+								<Route index element={<TeacherCollectionsPage />} />
+								<Route path="new" element={<CollectionsNewPage />} />
+								<Route
+									path="edit/:collectionId"
+									element={<CollectionsEditPage />}
+								/>
+							</Route>
 						</Route>
-					</Route>
-					<Route path="student">
-						<Route path="collections">
-							<Route index element={<StudentCollectionsPage />} />
-							<Route
-								path="play/:collectionId"
-								element={<CollectionsPlayPage />}
-							/>
+						<Route path="student">
+							<Route path="collections">
+								<Route index element={<StudentCollectionsPage />} />
+								<Route
+									path="play/:collectionId"
+									element={<CollectionsPlayPage />}
+								/>
+							</Route>
 						</Route>
-					</Route>
-				</Routes>
-			</BrowserRouter>
+					</Routes>
+				</BrowserRouter>
+			</AppLayout>
 		</SWRConfig>
 	)
 }
