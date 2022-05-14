@@ -1,45 +1,43 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import React from "react"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { SWRConfig } from "swr"
+import LandingPage from "./pages/Landing"
+import StudentCollectionsPage from "./pages/Student/Collections"
+import CollectionsPlayPage from "./pages/Student/Collections/Play"
+import TeacherCollectionsPage from "./pages/Teacher/Collections"
+import CollectionsEditPage from "./pages/Teacher/Collections/Edit"
+import CollectionsNewPage from "./pages/Teacher/Collections/New"
+import axiosFetcher from "./utils/axios/axiosFetcher"
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
-  )
+	return (
+		<SWRConfig value={{ fetcher: axiosFetcher, revalidateOnMount: true }}>
+			<BrowserRouter>
+				<Routes>
+					<Route index element={<LandingPage />} />
+					<Route path="teacher">
+						<Route path="collections">
+							<Route index element={<TeacherCollectionsPage />} />
+							<Route path="new" element={<CollectionsNewPage />} />
+							<Route
+								path="edit/:collectionId"
+								element={<CollectionsEditPage />}
+							/>
+						</Route>
+					</Route>
+					<Route path="student">
+						<Route path="collections">
+							<Route index element={<StudentCollectionsPage />} />
+							<Route
+								path="play/:collectionId"
+								element={<CollectionsPlayPage />}
+							/>
+						</Route>
+					</Route>
+				</Routes>
+			</BrowserRouter>
+		</SWRConfig>
+	)
 }
 
 export default App
