@@ -1,8 +1,10 @@
+import { WordCard } from "./WordCard"
+
 export interface Collection {
 	id: string
 	name: string
-	wordCount: number
-	coverImageSrc: string
+	coverImage: string
+	cards: WordCard[]
 }
 
 export interface CollectionOptions {

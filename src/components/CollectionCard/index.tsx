@@ -43,12 +43,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 	return (
 		<Card
 			hoverable
-			cover={<img alt={collection.name} src={collection.coverImageSrc} />}
+			cover={<img alt={collection.name} src={collection.coverImage} />}
 			actions={actions}
 		>
 			<Card.Meta
 				title={collection.name}
-				description={`words: ${collection.wordCount}`}
+				description={`words: ${collection.cards.length}`}
 			/>
 		</Card>
 	)
