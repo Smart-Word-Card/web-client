@@ -3,6 +3,7 @@ import React from "react"
 import { Collection, CollectionOptions } from "../../interfaces/Collection"
 import DeleteCollectionButton from "../DeleteCollectionButton"
 import EditCollectionButton from "../EditCollectionButton"
+import PlayCollectionButton from "../PlayCollectionButton"
 
 interface CollectionCardProps {
 	collection: Collection
@@ -16,6 +17,13 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 	mutateCollections,
 }) => {
 	const actions = []
+	if (collectionOptions.playable)
+		actions.push(
+			<PlayCollectionButton
+				key={`play-${collection.id}`}
+				collectionId={collection.id}
+			/>
+		)
 	if (collectionOptions.editable)
 		actions.push(
 			<EditCollectionButton

@@ -8,4 +8,5 @@ export interface Collection {
 export interface CollectionOptions {
 	editable?: boolean
 	deletable?: boolean
+	playable?: boolean
 }
