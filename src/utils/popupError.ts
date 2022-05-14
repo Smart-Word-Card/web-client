@@ -2,7 +2,7 @@ import { message } from "antd"
 import axios, { AxiosError } from "axios"
 
 const popupError = (err: unknown, errMsg?: string) => {
-	let msg = "Some thing went wrong"
+	let msg = "Something went wrong"
 
 	if (errMsg) {
 		msg = errMsg
