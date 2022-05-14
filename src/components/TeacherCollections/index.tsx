@@ -8,7 +8,7 @@ const TeacherCollections = () => {
 	return (
 		<Collections
 			collections={collections}
-			collectionOptions={{ editable: true, deletable: true }}
+			collectionOptions={{ editable: true, deletable: true, playable: true }}
 			mutateCollections={mutate}
 		/>
 	)
