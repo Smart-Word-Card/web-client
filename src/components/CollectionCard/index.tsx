@@ -7,11 +7,13 @@ import EditCollectionButton from "../EditCollectionButton"
 interface CollectionCardProps {
 	collection: Collection
 	collectionOptions: CollectionOptions
+	mutateCollections?: VoidFunction
 }
 
 const CollectionCard: React.FC<CollectionCardProps> = ({
 	collection,
 	collectionOptions = {},
+	mutateCollections,
 }) => {
 	const actions = []
 	if (collectionOptions.editable)
@@ -26,6 +28,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 			<DeleteCollectionButton
 				key={`delete-${collection.id}`}
 				collectionId={collection.id}
+				onFinished={mutateCollections}
 			/>
 		)
 

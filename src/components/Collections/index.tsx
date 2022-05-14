@@ -6,11 +6,13 @@ import CollectionCard from "../CollectionCard"
 interface CollectionsProps {
 	collections: Collection[]
 	collectionOptions?: CollectionOptions
+	mutateCollections?: VoidFunction
 }
 
 const Collections: React.FC<CollectionsProps> = ({
 	collections,
 	collectionOptions = {},
+	mutateCollections,
 }) => {
 	return (
 		<List
@@ -29,6 +31,7 @@ const Collections: React.FC<CollectionsProps> = ({
 					<CollectionCard
 						collection={item}
 						collectionOptions={collectionOptions}
+						mutateCollections={mutateCollections}
 					/>
 				</List.Item>
 			)}

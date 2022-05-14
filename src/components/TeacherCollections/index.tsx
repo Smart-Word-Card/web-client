@@ -3,12 +3,13 @@ import useTeacherCollections from "../../hooks/useTeacherCollections"
 import Collections from "../Collections"
 
 const TeacherCollections = () => {
-	const { collections } = useTeacherCollections()
+	const { collections, mutate } = useTeacherCollections()
 
 	return (
 		<Collections
 			collections={collections}
 			collectionOptions={{ editable: true, deletable: true }}
+			mutateCollections={mutate}
 		/>
 	)
 }
