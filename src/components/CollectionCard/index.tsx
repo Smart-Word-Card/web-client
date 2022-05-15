@@ -1,6 +1,7 @@
 import { Card } from "antd"
 import React from "react"
 import { Collection, CollectionOptions } from "../../interfaces/Collection"
+import { getImageURLFromKey } from "../../utils/getImageURLFromKey"
 import DeleteCollectionButton from "../DeleteCollectionButton"
 import EditCollectionButton from "../EditCollectionButton"
 import PlayCollectionButton from "../PlayCollectionButton"
@@ -43,7 +44,12 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 	return (
 		<Card
 			hoverable
-			cover={<img alt={collection.name} src={collection.coverImage} />}
+			cover={
+				<img
+					alt={collection.name}
+					src={getImageURLFromKey(collection.coverImage)}
+				/>
+			}
 			actions={actions}
 		>
 			<Card.Meta
