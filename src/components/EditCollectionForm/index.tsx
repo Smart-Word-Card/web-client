@@ -53,7 +53,6 @@ const EditCollectionForm: React.FC<EditCollectionFormProps> = ({
 					word,
 				})),
 			}
-			console.log("newValues", newValues)
 			form.setFieldsValue(newValues)
 		}
 	}, [JSON.stringify(initialValues)])
