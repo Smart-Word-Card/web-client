@@ -45,10 +45,13 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 		<Card
 			hoverable
 			cover={
-				<img
-					alt={collection.name}
-					src={getImageURLFromKey(collection.coverImage)}
-				/>
+				<div style={{ height: 120 }}>
+					<img
+						style={{ objectFit: "cover", width: "100%", height: "100%" }}
+						alt={collection.name}
+						src={getImageURLFromKey(collection.coverImage)}
+					/>
+				</div>
 			}
 			actions={actions}
 		>
