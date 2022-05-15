@@ -19,3 +19,9 @@ export interface CreateCollection {
 	coverImage: string
 	cards: Omit<WordCard, "id">[]
 }
+
+export interface CollectionFormValues {
+	name: string
+	coverImage: UploadFile[]
+	cards: { image: UploadFile[]; word: string }[]
+}
