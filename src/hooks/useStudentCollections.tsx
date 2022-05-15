@@ -2,7 +2,7 @@ import useSWR from "swr"
 import { Collection } from "../interfaces/Collection"
 
 const useStudentCollections = () => {
-	const url = "/api/play/collections"
+	const url = "/api/card-sets"
 
 	const { data, mutate, error } = useSWR<Collection[]>(url)
 
