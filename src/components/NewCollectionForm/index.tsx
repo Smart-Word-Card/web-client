@@ -3,16 +3,17 @@ import {
 	MinusCircleOutlined,
 	PlusOutlined,
 	UploadOutlined,
-	ZoomInOutlined,
 } from "@ant-design/icons"
 import { Button, Form, Input, Modal, Space, Typography, Upload } from "antd"
 import { UploadFile } from "antd/lib/upload/interface"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { appRoutes } from "../../constants/appRoutes"
+import { CreateCollection } from "../../interfaces/Collection"
 import axiosClient from "../../utils/axios/axiosClient"
 import { normFile, UploadFileChangeParam } from "../../utils/normFile"
 import popupError from "../../utils/popupError"
+import { uploadImage } from "../../utils/uploadImage"
 
 interface NewCollectionFormValues {
 	name: string
@@ -24,8 +25,30 @@ const NewCollectionForm = () => {
 	const [form] = Form.useForm<NewCollectionFormValues>()
 	const navigate = useNavigate()
 
-	async function onPreviewCollection(values: NewCollectionFormValues) {
-		console.log(values)
+	async function onCreateCollection(values: NewCollectionFormValues) {
+		try {
+			const coverImageKey = await uploadImage(
+				values.coverImage[0].originFileObj as Blob
+			)
+			const cardsWithKeys = await Promise.all(
+				values.cards.map(async ({ image, word }) => {
+					const imageKey = await uploadImage(image[0].originFileObj as Blob)
+					return {
+						image: imageKey,
+						word,
+					}
+				})
+			)
+			const payload: CreateCollection = {
+				name: values.name,
+				coverImage: coverImageKey,
+				cards: cardsWithKeys,
+			}
+			await axiosClient.post("/api/card-sets/", payload)
+			navigate(appRoutes.TEACHER_COLLECTIONS)
+		} catch (error) {
+			popupError(error)
+		}
 	}
 
 	async function getLabelFromImage(image: Blob) {
@@ -71,7 +94,7 @@ const NewCollectionForm = () => {
 	}
 
 	return (
-		<Form form={form} onFinish={onPreviewCollection} layout="vertical">
+		<Form form={form} onFinish={onCreateCollection} layout="vertical">
 			<Form.Item
 				name="name"
 				label="Collection Name"
@@ -97,30 +120,6 @@ const NewCollectionForm = () => {
 					<Button icon={<UploadOutlined />}>Click to upload</Button>
 				</Upload>
 			</Form.Item>
-
-			{/* <Form.Item
-				name="images"
-				label="Word Images"
-				valuePropName="fileList"
-				getValueFromEvent={normFile}
-				rules={[{ required: true }]}
-			>
-				<Upload.Dragger
-					name="images"
-					beforeUpload={() => false}
-					listType="picture-card"
-					accept="image/png, image/jpeg"
-					multiple
-					maxCount={10}
-				>
-					<Space direction="vertical">
-						<InboxOutlined />
-						<Typography.Text>
-							Click or drag file to this area to upload (Max: 10 images)
-						</Typography.Text>
-					</Space>
-				</Upload.Dragger>
-			</Form.Item> */}
 
 			<Typography.Paragraph>Words</Typography.Paragraph>
 
@@ -186,8 +185,8 @@ const NewCollectionForm = () => {
 					<Button type="default" onClick={onCancel} icon={<DeleteOutlined />}>
 						Cancel
 					</Button>
-					<Button type="primary" htmlType="submit" icon={<ZoomInOutlined />}>
-						Preview
+					<Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+						Create
 					</Button>
 				</Space>
 			</Form.Item>
