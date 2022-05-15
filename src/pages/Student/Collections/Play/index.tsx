@@ -127,8 +127,6 @@ const CollectionsPlayPage = () => {
 			)}
 
 			{showResult && <Result />}
-
-			{JSON.stringify(isCorrect)}
 		</>
 	)
 }
