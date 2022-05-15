@@ -18,7 +18,7 @@ const DeleteCollectionButton: React.FC<DeleteCollectionButtonProps> = ({
 			title: "Are you sure you want to delete this collection?",
 			onOk: async () => {
 				try {
-					await axiosClient.delete(`/api/manage/collections/${collectionId}`)
+					await axiosClient.delete(`/api/card-sets/${collectionId}`)
 					if (onFinished) onFinished()
 				} catch (error) {
 					popupError(error)
