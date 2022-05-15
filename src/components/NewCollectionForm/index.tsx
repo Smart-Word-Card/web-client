@@ -1,36 +1,23 @@
 import {
 	DeleteOutlined,
-	InboxOutlined,
 	MinusCircleOutlined,
 	PlusOutlined,
 	UploadOutlined,
 	ZoomInOutlined,
 } from "@ant-design/icons"
-import {
-	Button,
-	Col,
-	Form,
-	Input,
-	Modal,
-	Row,
-	Space,
-	Typography,
-	Upload,
-} from "antd"
+import { Button, Form, Input, Modal, Space, Typography, Upload } from "antd"
 import { UploadFile } from "antd/lib/upload/interface"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { appRoutes } from "../../constants/appRoutes"
-import { PreviewCollection } from "../../interfaces/Collection"
-import { PreviewWordCard } from "../../interfaces/WordCard"
 import axiosClient from "../../utils/axios/axiosClient"
-import { normFile } from "../../utils/normFile"
+import { normFile, UploadFileChangeParam } from "../../utils/normFile"
 import popupError from "../../utils/popupError"
 
 interface NewCollectionFormValues {
 	name: string
 	coverImage: UploadFile[]
-	images: UploadFile[]
+	cards: { image: UploadFile[]; word: string }[]
 }
 
 const NewCollectionForm = () => {
@@ -39,44 +26,35 @@ const NewCollectionForm = () => {
 
 	async function onPreviewCollection(values: NewCollectionFormValues) {
 		console.log(values)
-		return
-		try {
-			const cards: PreviewWordCard[] = await Promise.all(
-				values.images.map(async (image) => {
-					const formData = new FormData()
-					formData.append("image", image.originFileObj as Blob)
-					const response = await axiosClient.post("/api/label", formData)
-					return {
-						word: response.data[0].description,
-						image,
-					}
-				})
-			)
-			console.log("cards", cards)
-
-			const previewCollection: PreviewCollection = {
-				name: values.name,
-				coverImage: values.coverImage[0],
-				cards,
-			}
-			navigate(appRoutes.TEACHER_COLLECTIONS_PREVIEW, {
-				state: previewCollection,
-			})
-		} catch (error) {
-			popupError(new Error("Could not preview now"))
-		}
 	}
 
-	async function getLabelFromImage() {
+	async function getLabelFromImage(image: Blob) {
+		try {
+			const formData = new FormData()
+			formData.append("image", image)
+			const response = await axiosClient.post("/api/label", formData)
+			return response.data[0].description
+		} catch (error) {
+			popupError(error)
+		}
 		return ""
 	}
 
-	const beforeUpload = (key: number) => async () => {
-		console.log(key)
-		const values = form.getFieldsValue()
-		console.log(values)
-		return false
-	}
+	const onChange =
+		(index: number) =>
+		async ({ fileList }: UploadFileChangeParam) => {
+			if (!fileList.length) return false
+
+			const values = form.getFieldsValue()
+			console.log("values", values)
+			const image = values.cards[index].image[0].originFileObj as Blob
+			const word = await getLabelFromImage(image)
+			console.log(word)
+			values.cards[index].word = word
+			form.setFieldsValue(values)
+
+			return false
+		}
 
 	function onCancel() {
 		if (form.isFieldsTouched()) {
@@ -152,8 +130,8 @@ const NewCollectionForm = () => {
 						<>
 							{fields.map(({ key, name, ...restField }) => {
 								return (
-									<div>
-										<Space key={key} align="baseline">
+									<div key={key}>
+										<Space align="baseline">
 											<Form.Item
 												name={[name, "image"]}
 												// label="Word Image"
@@ -164,7 +142,8 @@ const NewCollectionForm = () => {
 											>
 												<Upload
 													name="image"
-													beforeUpload={beforeUpload(key)}
+													beforeUpload={() => false}
+													onChange={onChange(name)}
 													listType="picture"
 													accept="image/png, image/jpeg"
 													maxCount={1}
