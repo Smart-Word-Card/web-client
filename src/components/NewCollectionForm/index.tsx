@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom"
 import { appRoutes } from "../../constants/appRoutes"
 import { CreateCollection } from "../../interfaces/Collection"
 import axiosClient from "../../utils/axios/axiosClient"
+import { getLabelFromImage } from "../../utils/getLabelFromImage"
 import { normFile, UploadFileChangeParam } from "../../utils/normFile"
 import popupError from "../../utils/popupError"
 import { uploadImage } from "../../utils/uploadImage"
@@ -51,32 +52,19 @@ const NewCollectionForm = () => {
 		}
 	}
 
-	async function getLabelFromImage(image: Blob) {
-		try {
-			const formData = new FormData()
-			formData.append("image", image)
-			const response = await axiosClient.post("/api/label", formData)
-			return response.data[0].description
-		} catch (error) {
-			popupError(error)
-		}
-		return ""
-	}
-
 	const onChange =
 		(index: number) =>
 		async ({ fileList }: UploadFileChangeParam) => {
-			if (!fileList.length) return false
-
-			const values = form.getFieldsValue()
-			console.log("values", values)
-			const image = values.cards[index].image[0].originFileObj as Blob
-			const word = await getLabelFromImage(image)
-			console.log(word)
-			values.cards[index].word = word
-			form.setFieldsValue(values)
-
-			return false
+			if (!fileList.length) return
+			try {
+				const values = form.getFieldsValue()
+				const image = values.cards[index].image[0].originFileObj as Blob
+				const word = await getLabelFromImage(image)
+				values.cards[index].word = word
+				form.setFieldsValue(values)
+			} catch (error) {
+				popupError(error)
+			}
 		}
 
 	function onCancel() {
