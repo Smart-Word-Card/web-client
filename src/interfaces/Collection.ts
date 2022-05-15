@@ -1,3 +1,4 @@
+import { UploadFile } from "antd/lib/upload/interface"
 import { WordCard } from "./WordCard"
 
 export interface Collection {
@@ -11,4 +12,10 @@ export interface CollectionOptions {
 	editable?: boolean
 	deletable?: boolean
 	playable?: boolean
+}
+
+export interface CreateCollection {
+	name: string
+	coverImage: string
+	cards: Omit<WordCard, "id">[]
 }
