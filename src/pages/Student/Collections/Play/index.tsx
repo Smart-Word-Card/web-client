@@ -1,89 +1,136 @@
-import { Button, Image } from "antd";
-import { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import useCollection from "../../../../hooks/useCollection";
-import axiosClient from "../../../../utils/axios/axiosClient";
+import {
+	DatabaseOutlined,
+	HomeOutlined,
+	PlayCircleOutlined,
+} from "@ant-design/icons"
+import { Button, Image, Rate, Row, Typography } from "antd"
+import { useEffect, useRef, useState } from "react"
+import { Helmet } from "react-helmet"
+import { useNavigate, useParams } from "react-router-dom"
+import PageBreadcrumb from "../../../../components/PageBreadcrumb"
+import PlayWordCard from "../../../../components/PlayWordCard"
+import { appRoutes } from "../../../../constants/appRoutes"
+import useCollection from "../../../../hooks/useCollection"
+import axiosClient from "../../../../utils/axios/axiosClient"
 
 const CollectionsPlayPage = () => {
-  const { collectionId } = useParams();
-  const { collection, loading } = useCollection(collectionId!);
-  const [transcription, setTranscription] = useState("");
+	const { collectionId } = useParams()
+	const { collection, loading, error } = useCollection(collectionId!)
 
-  const read = async (word: string) => {
-    const resp = await fetch("/api/read", {
-      method: "POST",
-      headers: {
-        Accept: "audio/mp3",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: word,
-      }),
-    });
-    const arrayBuffer = await resp.arrayBuffer();
-    const audioContext = new AudioContext();
-    audioContext.decodeAudioData(arrayBuffer, (buffer) => {
-      console.log(buffer);
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioContext.destination);
-      source.start();
-    });
-  };
+	const noOfWords = collection?.cards.length ?? 0
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	const [isCorrect, setIsCorrect] = useState(new Array(noOfWords).fill(0))
 
-  const speak = () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser does not support recording!");
-      return;
-    }
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: true,
-      })
-      .then((stream) => {
-        if (!mediaRecorderRef.current) {
-          mediaRecorderRef.current = new MediaRecorder(stream);
-        }
-        const mediaRecorder = mediaRecorderRef.current;
-        mediaRecorder.start();
-        mediaRecorder.ondataavailable = async (ev) => {
-          const formData = new FormData();
-          formData.append("audio", ev.data);
-          const response = await axiosClient.post(
-            "/api/transcribe-v2",
-            formData
-          );
-          console.log(response.data);
-          setTranscription(response.data[0]?.alternatives[0]?.transcript);
-        };
-        mediaRecorder.onstop = (ev) => {
-          console.log("stopped", ev);
-        };
-        mediaRecorder;
-      });
-  };
+	const [currentWordIndex, setCurrentWordIndex] = useState(0)
+	const [showResult, setShowResult] = useState(false)
 
-  const stopSpeak = () => {
-    mediaRecorderRef.current?.stop();
-  };
+	const navigate = useNavigate()
 
-  return (
-    <div>
-      {JSON.stringify(collection)}
-      <div>
-        <Image src={collection?.cards[0].image} />
-        <span>{collection?.cards[0].word}</span>
-        <Button onClick={() => read(collection?.cards[0].word!)}>Listen</Button>
-        <Button onClick={() => speak()}>Speak</Button>
-        <Button onClick={() => stopSpeak()}>Stop</Button>
-        {transcription}
-        <Button>Previous</Button>
-        <Button>Next</Button>
-      </div>
-    </div>
-  );
-};
+	useEffect(() => {
+		if (collection) {
+			setIsCorrect(new Array(noOfWords).fill(0))
+		}
+	}, [loading])
 
-export default CollectionsPlayPage;
+	function onPrevious() {
+		if (currentWordIndex > 0) setCurrentWordIndex(currentWordIndex - 1)
+	}
+
+	function onNext() {
+		if (currentWordIndex < noOfWords - 1)
+			setCurrentWordIndex(currentWordIndex + 1)
+		if (currentWordIndex === noOfWords - 1) {
+			setShowResult(true)
+		}
+	}
+
+	const onCorrect = () => {
+		setIsCorrect((arr) => {
+			const newArr = Array.from(arr)
+			newArr[currentWordIndex] = 1
+			return newArr
+		})
+	}
+
+	const onWrong = () => {
+		setIsCorrect((arr) => {
+			const newArr = Array.from(arr)
+			newArr[currentWordIndex] = 0
+			return newArr
+		})
+	}
+
+	const Result = () => {
+		const score = isCorrect.reduce((partialSum, a) => partialSum + a, 0)
+		const stars = Math.ceil((score / noOfWords) * 10) / 2
+		return (
+			<>
+				<Row justify="center">
+					<Typography.Title level={2}>{collection?.name}</Typography.Title>
+				</Row>
+				<Row justify="center">
+					<Typography.Title level={4}>
+						{score} / {noOfWords}
+					</Typography.Title>
+				</Row>
+				<Row justify="center">
+					<Rate allowHalf defaultValue={stars} disabled />
+				</Row>
+				<Row justify="center">
+					<Button
+						onClick={() => navigate(appRoutes.STUDENT_COLLECTIONS)}
+						style={{ marginTop: 20 }}
+					>
+						Back to home
+					</Button>
+				</Row>
+			</>
+		)
+	}
+
+	return (
+		<>
+			<Helmet>
+				<title>Play Collections</title>
+			</Helmet>
+			<PageBreadcrumb
+				items={[
+					{ icon: <HomeOutlined />, href: appRoutes.LANDING },
+					{ label: "collections", icon: <DatabaseOutlined /> },
+					{
+						label: "play",
+						icon: <PlayCircleOutlined />,
+						href: appRoutes.STUDENT_COLLECTIONS,
+					},
+					{
+						label: collection?.name,
+					},
+				]}
+			/>
+			<Typography.Title>
+				{showResult
+					? "Result"
+					: `${collection?.name} (${currentWordIndex + 1}/${
+							collection?.cards.length
+					  })`}
+			</Typography.Title>
+
+			{collection && !showResult && (
+				<PlayWordCard
+					wordCard={collection?.cards[currentWordIndex]}
+					onPrevious={onPrevious}
+					onNext={onNext}
+					isCorrect={!!isCorrect[currentWordIndex]}
+					onCorrect={onCorrect}
+					onWrong={onWrong}
+				/>
+			)}
+
+			{showResult && <Result />}
+
+			{JSON.stringify(isCorrect)}
+		</>
+	)
+}
+
+export default CollectionsPlayPage
